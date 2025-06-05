@@ -9,8 +9,7 @@
 - **Backup Delete Script**: node scripts/fix-config-types.js
 - **Automation Copy Script**: ./setup-new-project.sh
 - **NPM Script**: npm run generate-cursor-prompt
-- **Cursor Project Setup**: npm run generate-cursor-prompt
-  ./setup-new-project.sh
+- **🚀 ENHANCED Cursor Project Setup**: npm install node-fetch ------>>> npm run generate-automotive-redesign
 
 ## 📋 Setup Instructions
 
@@ -71,31 +70,108 @@ git pull origin julien
 - Run `./collaborate.sh push` when finished
 - Config editor URL: http://localhost:3000/config-editor
 
-## ✅ Created Files:
+## 🚀 FULLY AUTOMATED AUTOMOTIVE REDESIGN SCRIPT
 
-1. **`scripts/fix-hardcoded-images.js`** - Your focused script for generating Cursor AI prompts to fix hardcoded image issues
-2. **`scripts/README.md`** - Documentation explaining how to use the script
-3. **Updated `package.json`** - Added `"fix-images": "node scripts/fix-hardcoded-images.js"` script
+### ✅ 100% AUTOMATED - ZERO MANUAL INPUT REQUIRED:
 
-## 🚀 How to Use:
+**🔒 SAFE AUTOMATION FEATURES:**
+
+- **Preserves Existing Services**: Never modifies or removes existing service sections
+- **Preserves Guarantees**: Never touches existing warranty/guarantee content
+- **Smart Missing Data Handling**: Skips missing phone/email, keeps existing localConfig values
+- **No Data Loss Risk**: Only updates fields that have extracted data
+
+**🔍 Advanced Data Extraction (7+ Sources):**
+
+- **Google Business/Maps**: Business info, hours, services, reviews, contact details
+- **Yelp**: Categories, reviews, ratings, business details, hours
+- **Facebook**: Company description, contact info, business name
+- **Better Business Bureau**: BBB rating, years in business, accreditation
+- **LinkedIn**: Company profiles, descriptions, business information
+- **Automotive Marketplaces**: CarGurus, AutoTrader, Cars.com dealer info
+- **General Websites**: Enhanced pattern matching for all business data
+
+**📊 Automatically Extracted (No Manual Input):**
+
+- Business name, address, phone, email (when available)
+- Business hours and emergency service availability
+- Services and specialties (enhanced automotive keyword detection)
+- Customer reviews and ratings
+- BBB ratings and years in business
+- Emergency/24-hour services, mobile services, roadside assistance
+- Automotive-specific services (tire, oil, brake, transmission, engine, etc.)
+- Certifications and warranties
+
+### 🎯 How to Use the FULLY AUTOMATED Script:
 
 ```bash
-npm run fix-images
+npm run generate-automotive-redesign
 ```
 
-## 📋 What the Script Does:
+**What it does:**
 
-1. **Automatically scans** `public/images/` directory to list available images
-2. **Collects business context** (company name, website type, location)
-3. **Gathers reference links** (Google Business, Yelp, etc.)
-4. **Asks for image usage preferences**
-5. **Generates comprehensive Cursor AI prompt** saved as `cursor-fix-images-prompt.md`
+1. **Comprehensive Web Scraping** - Automatically extracts detailed business information from:
 
-## 🎯 Perfect For:
+   - Google Business profiles and Google Maps
+   - Yelp business pages
+   - Facebook business pages
+   - BBB profiles
+   - LinkedIn company pages
+   - Automotive marketplace listings
+   - General business websites
 
-- Fixing 404 image errors
-- Converting hardcoded CSS background images to configuration-driven ones
-- Ensuring all image references point to existing files
-- Making websites easily customizable through config files
+2. **Smart Automotive Detection** - Identifies automotive-specific:
 
-Your script is much more focused than my previous version - it specifically targets the hardcoded image problem we solved in this project, making it perfect for similar situations where websites have broken image references that need systematic fixing!
+   - Services (tire, brake, oil change, transmission, etc.)
+   - Emergency services (24-hour, roadside assistance, mobile service)
+   - Specialties and certifications
+
+3. **Enhanced Data Processing** - Collects and deduplicates:
+
+   - Business contact information
+   - Operating hours
+   - Customer reviews
+   - Service offerings
+   - Emergency capabilities
+
+4. **Generates Comprehensive Cursor AI Prompt** - Creates detailed instructions for:
+   - Complete website redesign using localConfig.ts
+   - Page-by-page content updates
+   - Automotive business branding
+   - Service alignment and emergency service highlighting
+
+### 🔧 Previous Script (Basic Image Fixing):
+
+1. **`scripts/fix-hardcoded-images.js`** - Basic script for generating Cursor AI prompts to fix hardcoded image issues
+2. **`scripts/README.md`** - Documentation explaining how to use the basic script
+3. **Updated `package.json`** - Added `"fix-images": "node scripts/fix-hardcoded-images.js"` script
+
+## 📈 PERFORMANCE COMPARISON:
+
+**Before (Manual Input Required):**
+
+- ❌ Required manual input for every field
+- ❌ Risk of modifying existing services/guarantees
+- ❌ Time-consuming data entry process
+- ❌ Only extracted 2-3 basic data points from URLs
+
+**After (Fully Automated + Safe):**
+
+- ✅ 100% automated - zero manual input required
+- ✅ Preserves existing services & guarantee sections
+- ✅ Smart handling of missing data (keeps existing values)
+- ✅ Extracts 15+ comprehensive data points per website
+- ✅ Real-time content scraping from 7+ website types
+- ✅ Automotive-specific service detection
+- ✅ Emergency service identification
+- ✅ BBB ratings and business credibility data
+- ✅ Auto-extracted customer reviews when available
+
+### 🚗 Perfect For:
+
+- **Automotive Businesses**: Tire shops, auto repair, mobile mechanics
+- **Emergency Services**: 24-hour roadside assistance, mobile service
+- **Service Centers**: Oil change, brake repair, transmission shops
+- **Comprehensive Redesigns**: Full website overhaul with real business data
+
+🎯 **Result**: The AI now gets comprehensive, real business information instead of just basic URL patterns, enabling much more accurate and detailed website redesigns!

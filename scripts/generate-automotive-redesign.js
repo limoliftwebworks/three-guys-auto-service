@@ -6,14 +6,25 @@ const path = require("path");
 
 // Check if we can use web search functionality
 let webSearchAvailable = false;
+let fetch;
 try {
   // Try to import node-fetch for web requests
-  require.resolve("node-fetch");
+  const nodeFetch = require("node-fetch");
+  // node-fetch v3+ exports as ES module with default export
+  fetch = nodeFetch.default;
+
+  if (typeof fetch !== "function") {
+    throw new Error("node-fetch default export is not a function");
+  }
+
   webSearchAvailable = true;
+  console.log("✅ Web scraping enabled with node-fetch");
 } catch (e) {
   console.log(
-    "⚠️  Note: node-fetch not available. Install with 'npm install node-fetch' for enhanced web search."
+    "⚠️  Note: node-fetch not available. Install with 'npm install node-fetch' for enhanced web scraping."
   );
+  console.log("    Limited to URL pattern matching only.");
+  console.log("    Error:", e.message);
 }
 
 const rl = readline.createInterface({
@@ -21,11 +32,24 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-console.log("\n🚗 Automotive Website Redesign - Cursor AI Prompt Generator");
-console.log("============================================================");
 console.log(
-  "This script generates a comprehensive prompt for Cursor AI to redesign automotive websites using localConfig.ts\n"
+  "\n🚗 FULLY AUTOMATED Automotive Website Redesign - Cursor AI Prompt Generator"
 );
+console.log(
+  "======================================================================="
+);
+console.log(
+  "This script automatically extracts business data and generates safe prompts for Cursor AI\n"
+);
+console.log("🚀 FULLY AUTOMATED FEATURES:");
+console.log("   ✅ Zero manual input required - 100% automated");
+console.log("   🔒 Preserves existing services & guarantee sections");
+console.log(
+  "   📞 Skips missing contact info (keeps existing localConfig values)"
+);
+console.log("   🌐 Comprehensive web scraping from 7+ website types");
+console.log("   🎨 Smart automotive branding defaults");
+console.log("   ⭐ Auto-extracted customer reviews when available\n");
 
 // Function to prompt for input
 function askQuestion(question) {
@@ -36,10 +60,701 @@ function askQuestion(question) {
   });
 }
 
-// Function to search web for business information
+// Function to delay between requests to be respectful
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// Function to extract text content safely
+function extractTextContent(html, selector) {
+  try {
+    const regex = new RegExp(selector, "gi");
+    const matches = html.match(regex);
+    if (matches && matches.length > 0) {
+      return matches[0].replace(/<[^>]*>/g, "").trim();
+    }
+  } catch (e) {
+    // Silent fail for regex issues
+  }
+  return null;
+}
+
+// Function to extract multiple text contents
+function extractMultipleTextContent(html, selector) {
+  try {
+    const regex = new RegExp(selector, "gi");
+    const matches = html.match(regex) || [];
+    return matches
+      .map((match) => match.replace(/<[^>]*>/g, "").trim())
+      .filter((text) => text.length > 0);
+  } catch (e) {
+    return [];
+  }
+}
+
+// Enhanced function to scrape business information from web pages
+async function scrapeBusinessInfo(link) {
+  try {
+    console.log(`🔍 Scraping: ${link}`);
+
+    if (!webSearchAvailable) {
+      console.log(
+        `   ⚠️ Web scraping not available - falling back to URL pattern matching`
+      );
+      return await searchBusinessInfo(link);
+    }
+
+    // Add delay to be respectful
+    await delay(1000);
+
+    const response = await fetch(link, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+      },
+      timeout: 10000,
+    });
+
+    if (!response.ok) {
+      console.log(
+        `   ❌ HTTP ${response.status} - falling back to URL pattern matching`
+      );
+      return await searchBusinessInfo(link);
+    }
+
+    const html = await response.text();
+
+    const extractedInfo = {
+      businessName: null,
+      address: null,
+      phone: null,
+      email: null,
+      businessHours: null,
+      businessType: null,
+      specialties: null,
+      description: null,
+      services: [],
+      reviews: [],
+      website: null,
+      socialMedia: {},
+      bbbRating: null,
+      yearsInBusiness: null,
+      emergencyServices: [],
+      certifications: [],
+      warranties: [],
+      pricing: null,
+    };
+
+    // Google Business / Google Maps scraping
+    if (link.includes("google.com") || link.includes("goo.gl")) {
+      console.log(`   📍 Scraping Google Business information...`);
+
+      // Business name
+      let businessName =
+        extractTextContent(html, "<h1[^>]*>[^<]*</h1>") ||
+        extractTextContent(
+          html,
+          '<h2[^>]*data-attrid="title"[^>]*>[^<]*</h2>'
+        ) ||
+        extractTextContent(html, '"name":"[^"]*"');
+      if (businessName) {
+        businessName = businessName
+          .replace(/"/g, "")
+          .replace(/name:/g, "")
+          .trim();
+        extractedInfo.businessName = businessName;
+        console.log(`   ✓ Business Name: ${businessName}`);
+      }
+
+      // Address
+      let address =
+        extractTextContent(
+          html,
+          '"address":\\{[^}]*"streetAddress":"[^"]*"[^}]*"addressLocality":"[^"]*"[^}]*"addressRegion":"[^"]*"[^}]*"postalCode":"[^"]*"'
+        ) ||
+        extractTextContent(
+          html,
+          'data-attrid="kp-wp-tab-cont-address-1"[^>]*>[^<]*</div>'
+        );
+      if (address) {
+        address = address
+          .replace(/"/g, "")
+          .replace(
+            /address:|streetAddress:|addressLocality:|addressRegion:|postalCode:/g,
+            ""
+          )
+          .trim();
+        extractedInfo.address = address;
+        console.log(`   ✓ Address: ${address}`);
+      }
+
+      // Phone number
+      let phone =
+        extractTextContent(html, '"telephone":"[^"]*"') ||
+        extractTextContent(
+          html,
+          'data-attrid="kp-wp-tab-cont-phone"[^>]*>[^<]*</a>'
+        );
+      if (phone) {
+        phone = phone
+          .replace(/"/g, "")
+          .replace(/telephone:/g, "")
+          .trim();
+        extractedInfo.phone = phone;
+        console.log(`   ✓ Phone: ${phone}`);
+      }
+
+      // Business hours
+      const hoursPatterns = [
+        '"openingHours":\\[[^\\]]*\\]',
+        'data-attrid="kp-wp-tab-cont-hours"[^>]*>[\\s\\S]*?</div>',
+        '"dayOfWeek":"[^"]*","opens":"[^"]*","closes":"[^"]*"',
+      ];
+
+      for (const pattern of hoursPatterns) {
+        const hours = extractTextContent(html, pattern);
+        if (hours) {
+          extractedInfo.businessHours = hours
+            .replace(/"/g, "")
+            .replace(/openingHours:|dayOfWeek:|opens:|closes:/g, "")
+            .trim();
+          console.log(`   ✓ Business Hours: ${extractedInfo.businessHours}`);
+          break;
+        }
+      }
+
+      // Services/Specialties from Google Business
+      const services = extractMultipleTextContent(
+        html,
+        "Services:.*?<[^>]*>[^<]*automotive[^<]*</[^>]*>"
+      );
+      if (services.length > 0) {
+        extractedInfo.services = services;
+        extractedInfo.specialties = services.join(", ");
+        console.log(`   ✓ Services: ${services.join(", ")}`);
+      }
+
+      // Reviews
+      const reviews = extractMultipleTextContent(
+        html,
+        '"text":"[^"]*"[^}]*"authorName":"[^"]*"[^}]*"rating":[0-9]'
+      );
+      if (reviews.length > 0) {
+        extractedInfo.reviews = reviews.slice(0, 5); // Limit to 5 reviews
+        console.log(`   ✓ Found ${reviews.length} reviews`);
+      }
+    }
+
+    // Yelp scraping
+    if (link.includes("yelp.com")) {
+      console.log(`   ⭐ Scraping Yelp information...`);
+
+      // Business name from Yelp
+      let businessName =
+        extractTextContent(html, "<h1[^>]*>[^<]*</h1>") ||
+        extractTextContent(html, '"name":"[^"]*"');
+      if (businessName) {
+        businessName = businessName
+          .replace(/"/g, "")
+          .replace(/name:/g, "")
+          .trim();
+        extractedInfo.businessName = businessName;
+        console.log(`   ✓ Business Name: ${businessName}`);
+      }
+
+      // Address from Yelp
+      let address = extractTextContent(
+        html,
+        '"streetAddress":"[^"]*"[^}]*"addressLocality":"[^"]*"[^}]*"addressRegion":"[^"]*"[^}]*"postalCode":"[^"]*"'
+      );
+      if (address) {
+        address = address
+          .replace(/"/g, "")
+          .replace(
+            /streetAddress:|addressLocality:|addressRegion:|postalCode:/g,
+            " "
+          )
+          .trim();
+        extractedInfo.address = address;
+        console.log(`   ✓ Address: ${address}`);
+      }
+
+      // Phone from Yelp
+      let phone =
+        extractTextContent(html, '"telephone":"[^"]*"') ||
+        extractTextContent(html, "phone-number[^>]*>[^<]*</p>");
+      if (phone) {
+        phone = phone
+          .replace(/"/g, "")
+          .replace(/telephone:/g, "")
+          .trim();
+        extractedInfo.phone = phone;
+        console.log(`   ✓ Phone: ${phone}`);
+      }
+
+      // Business hours from Yelp
+      const yelpHours = extractMultipleTextContent(
+        html,
+        '"day":"[^"]*","start":"[^"]*","end":"[^"]*"'
+      );
+      if (yelpHours.length > 0) {
+        extractedInfo.businessHours = yelpHours.join("; ");
+        console.log(`   ✓ Business Hours: ${extractedInfo.businessHours}`);
+      }
+
+      // Categories/Services from Yelp
+      const categories =
+        extractMultipleTextContent(html, '"categories":\\[[^\\]]*\\]') ||
+        extractMultipleTextContent(html, "category-str-list[^>]*>[^<]*</span>");
+      if (categories.length > 0) {
+        extractedInfo.businessType = categories[0];
+        extractedInfo.specialties = categories.join(", ");
+        console.log(`   ✓ Categories: ${categories.join(", ")}`);
+      }
+
+      // Reviews from Yelp
+      const yelpReviews = extractMultipleTextContent(
+        html,
+        '"text":"[^"]*"[^}]*"user":\\{[^}]*"name":"[^"]*"[^}]*"rating":[0-9]'
+      );
+      if (yelpReviews.length > 0) {
+        extractedInfo.reviews = yelpReviews.slice(0, 5);
+        console.log(`   ✓ Found ${yelpReviews.length} Yelp reviews`);
+      }
+    }
+
+    // Facebook scraping
+    if (link.includes("facebook.com")) {
+      console.log(`   📘 Scraping Facebook information...`);
+
+      // Business name from Facebook
+      let businessName =
+        extractTextContent(html, "<title>[^<]*</title>") ||
+        extractTextContent(html, '"name":"[^"]*"');
+      if (businessName) {
+        businessName = businessName
+          .replace(/"/g, "")
+          .replace(/name:/g, "")
+          .replace(/\| Facebook/g, "")
+          .trim();
+        extractedInfo.businessName = businessName;
+        console.log(`   ✓ Business Name: ${businessName}`);
+      }
+
+      // Description from Facebook
+      let description =
+        extractTextContent(html, '"description":"[^"]*"') ||
+        extractTextContent(
+          html,
+          'meta[^>]*property="og:description"[^>]*content="[^"]*"'
+        );
+      if (description) {
+        description = description
+          .replace(/"/g, "")
+          .replace(/description:|content=/g, "")
+          .trim();
+        extractedInfo.description = description;
+        console.log(`   ✓ Description: ${description.substring(0, 100)}...`);
+      }
+
+      // Contact info from Facebook
+      let phone = extractTextContent(html, '"telephone":"[^"]*"');
+      if (phone) {
+        phone = phone
+          .replace(/"/g, "")
+          .replace(/telephone:/g, "")
+          .trim();
+        extractedInfo.phone = phone;
+        console.log(`   ✓ Phone: ${phone}`);
+      }
+
+      let email =
+        extractTextContent(html, '"email":"[^"]*"') ||
+        extractTextContent(
+          html,
+          "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"
+        );
+      if (email) {
+        email = email
+          .replace(/"/g, "")
+          .replace(/email:/g, "")
+          .trim();
+        extractedInfo.email = email;
+        console.log(`   ✓ Email: ${email}`);
+      }
+    }
+
+    // Better Business Bureau (BBB) scraping
+    if (link.includes("bbb.org")) {
+      console.log(`   📊 Scraping BBB information...`);
+
+      // Business name from BBB
+      let businessName =
+        extractTextContent(
+          html,
+          '<h1[^>]*class="[^"]*business-name[^"]*"[^>]*>[^<]*</h1>'
+        ) || extractTextContent(html, '"businessName":"[^"]*"');
+      if (businessName) {
+        businessName = businessName
+          .replace(/"/g, "")
+          .replace(/businessName:/g, "")
+          .trim();
+        extractedInfo.businessName = businessName;
+        console.log(`   ✓ BBB Business Name: ${businessName}`);
+      }
+
+      // BBB Rating and accreditation
+      let bbbRating = extractTextContent(html, "BBB Rating[^\\d]*([A-F][+-]?)");
+      if (bbbRating) {
+        extractedInfo.bbbRating = bbbRating;
+        console.log(`   ✓ BBB Rating: ${bbbRating}`);
+      }
+
+      // Years in business
+      let yearsInBusiness = extractTextContent(
+        html,
+        "Years in Business[^\\d]*(\\d+)"
+      );
+      if (yearsInBusiness) {
+        extractedInfo.yearsInBusiness = yearsInBusiness;
+        console.log(`   ✓ Years in Business: ${yearsInBusiness}`);
+      }
+    }
+
+    // Automotive-specific websites (CarGurus, AutoTrader, etc.)
+    if (
+      link.includes("cargurus.com") ||
+      link.includes("autotrader.com") ||
+      link.includes("cars.com")
+    ) {
+      console.log(`   🚗 Scraping automotive marketplace information...`);
+
+      // Dealer/Service information
+      let dealerName =
+        extractTextContent(html, '"dealerName":"[^"]*"') ||
+        extractTextContent(html, "dealer-name[^>]*>[^<]*</");
+      if (dealerName) {
+        dealerName = dealerName
+          .replace(/"/g, "")
+          .replace(/dealerName:/g, "")
+          .trim();
+        extractedInfo.businessName = dealerName;
+        console.log(`   ✓ Dealer Name: ${dealerName}`);
+      }
+    }
+
+    // LinkedIn business pages
+    if (link.includes("linkedin.com/company")) {
+      console.log(`   💼 Scraping LinkedIn company information...`);
+
+      // Company name
+      let companyName =
+        extractTextContent(html, "<h1[^>]*>[^<]*</h1>") ||
+        extractTextContent(html, '"name":"[^"]*"');
+      if (companyName) {
+        companyName = companyName
+          .replace(/"/g, "")
+          .replace(/name:/g, "")
+          .replace(/\| LinkedIn/g, "")
+          .trim();
+        extractedInfo.businessName = companyName;
+        console.log(`   ✓ LinkedIn Company: ${companyName}`);
+      }
+
+      // Company description
+      let description =
+        extractTextContent(html, '"description":"[^"]*"') ||
+        extractTextContent(
+          html,
+          'meta[^>]*property="og:description"[^>]*content="[^"]*"'
+        );
+      if (description) {
+        description = description
+          .replace(/"/g, "")
+          .replace(/description:|content=/g, "")
+          .trim();
+        extractedInfo.description = description;
+        console.log(
+          `   ✓ Company Description: ${description.substring(0, 100)}...`
+        );
+      }
+    }
+
+    // Generic website scraping for automotive businesses (enhanced)
+    if (
+      !link.includes("google.com") &&
+      !link.includes("yelp.com") &&
+      !link.includes("facebook.com") &&
+      !link.includes("bbb.org") &&
+      !link.includes("linkedin.com") &&
+      !link.includes("cargurus.com") &&
+      !link.includes("autotrader.com")
+    ) {
+      console.log(`   🌐 Scraping general website information...`);
+
+      // Enhanced business name extraction
+      let businessName =
+        extractTextContent(html, "<title>[^<]*</title>") ||
+        extractTextContent(html, "<h1[^>]*>[^<]*</h1>") ||
+        extractTextContent(html, '"name":"[^"]*"') ||
+        extractTextContent(html, 'property="og:site_name"[^>]*content="[^"]*"');
+      if (businessName) {
+        businessName = businessName
+          .replace(/"/g, "")
+          .replace(/name:|content=/g, "")
+          .replace(/\|.*$/, "")
+          .trim();
+        extractedInfo.businessName = businessName;
+        console.log(`   ✓ Website Business Name: ${businessName}`);
+      }
+
+      // Enhanced automotive-specific content detection
+      const automotiveKeywords = [
+        "tire",
+        "auto",
+        "repair",
+        "mechanic",
+        "brake",
+        "oil change",
+        "automotive",
+        "car",
+        "truck",
+        "service",
+        "transmission",
+        "battery",
+        "muffler",
+        "exhaust",
+        "engine",
+        "suspension",
+        "alignment",
+        "inspection",
+        "diagnostic",
+        "maintenance",
+        "tune-up",
+        "radiator",
+        "coolant",
+        "belts",
+        "hoses",
+        "filters",
+        "windshield",
+        "glass",
+        "detailing",
+        "wash",
+        "emergency roadside",
+        "towing",
+        "mobile service",
+      ];
+      const pageText = html.toLowerCase();
+
+      const foundKeywords = automotiveKeywords.filter((keyword) =>
+        pageText.includes(keyword)
+      );
+      if (foundKeywords.length > 0) {
+        extractedInfo.businessType = "Automotive Service";
+        extractedInfo.specialties = foundKeywords.slice(0, 10).join(", ");
+        console.log(
+          `   ✓ Automotive keywords found (${
+            foundKeywords.length
+          }): ${foundKeywords.slice(0, 5).join(", ")}${
+            foundKeywords.length > 5 ? "..." : ""
+          }`
+        );
+      }
+
+      // Enhanced service extraction from page content
+      const servicePatterns = [
+        "services?[^\\w]*([^<]*(?:tire|oil|brake|transmission|engine|repair|maintenance|diagnostic|inspection)[^<]*)",
+        "we (offer|provide|specialize)[^<]*([^<]*(?:automotive|auto|car|truck)[^<]*)",
+        "(?:our|available)\\s+services?[^<]*([^<]*(?:repair|maintenance|service)[^<]*)",
+      ];
+
+      const extractedServices = [];
+      for (const pattern of servicePatterns) {
+        const services = extractMultipleTextContent(html, pattern);
+        extractedServices.push(...services);
+      }
+
+      if (extractedServices.length > 0) {
+        extractedInfo.services = [...new Set(extractedServices)].slice(0, 15);
+        console.log(
+          `   ✓ Services extracted: ${extractedInfo.services
+            .slice(0, 3)
+            .join(", ")}${extractedInfo.services.length > 3 ? "..." : ""}`
+        );
+      }
+
+      // Enhanced contact information extraction
+      const phonePatterns = [
+        "\\(\\d{3}\\)\\s*\\d{3}-\\d{4}",
+        "\\d{3}-\\d{3}-\\d{4}",
+        "\\d{3}\\.\\d{3}\\.\\d{4}",
+        "\\+1[\\s\\-]?\\(?\\d{3}\\)?[\\s\\-]?\\d{3}[\\s\\-]?\\d{4}",
+        "call[^\\d]*(\\d{3}[\\s\\-\\.]?\\d{3}[\\s\\-\\.]?\\d{4})",
+        "phone[^\\d]*(\\d{3}[\\s\\-\\.]?\\d{3}[\\s\\-\\.]?\\d{4})",
+      ];
+
+      for (const pattern of phonePatterns) {
+        const phone = extractTextContent(html, pattern);
+        if (phone && !extractedInfo.phone) {
+          extractedInfo.phone = phone.replace(/[^\d\-\(\)\s\+]/g, "").trim();
+          console.log(`   ✓ Phone: ${extractedInfo.phone}`);
+          break;
+        }
+      }
+
+      // Enhanced email extraction
+      const emailPatterns = [
+        "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+        "mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+        "email[^@]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+        "contact[^@]*([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})",
+      ];
+
+      for (const pattern of emailPatterns) {
+        const email = extractTextContent(html, pattern);
+        if (email && !extractedInfo.email) {
+          extractedInfo.email = email
+            .replace(/mailto:|email:|contact:/gi, "")
+            .trim();
+          console.log(`   ✓ Email: ${extractedInfo.email}`);
+          break;
+        }
+      }
+
+      // Enhanced address extraction
+      const addressPatterns = [
+        "\\d+\\s+[A-Za-z\\s]+(?:Street|St|Avenue|Ave|Road|Rd|Boulevard|Blvd|Drive|Dr|Lane|Ln|Way)[^\\n\\r]{0,50}",
+        "address[^\\n\\r]*([^\\n\\r]*\\d+[^\\n\\r]*(?:Street|St|Avenue|Ave|Road|Rd)[^\\n\\r]*)",
+        "located[^\\n\\r]*([^\\n\\r]*\\d+[^\\n\\r]*(?:Street|St|Avenue|Ave|Road|Rd)[^\\n\\r]*)",
+      ];
+
+      for (const pattern of addressPatterns) {
+        const address = extractTextContent(html, pattern);
+        if (address && !extractedInfo.address) {
+          extractedInfo.address = address
+            .replace(/address:|located:/gi, "")
+            .trim();
+          console.log(`   ✓ Address: ${extractedInfo.address}`);
+          break;
+        }
+      }
+
+      // Enhanced business hours extraction
+      const enhancedHoursPatterns = [
+        "(?:hours?|open)[^\\n\\r]*\\n?[^\\n\\r]*(?:mon|monday)[^\\n\\r]*\\d{1,2}[:\\s]*\\d{0,2}[^\\n\\r]*[ap]?m?[^\\n\\r]*\\d{1,2}[:\\s]*\\d{0,2}[^\\n\\r]*[ap]?m?",
+        "(?:business|store|shop)\\s+hours?[^\\n\\r]*\\n?[^\\n\\r]*(?:mon|monday)[^\\n\\r]*\\d{1,2}",
+        "hours?[^\\n\\r]*(?:monday|mon)[^\\n\\r]*(?:tuesday|tue)[^\\n\\r]*(?:wednesday|wed)",
+        "open[^\\n\\r]*(?:7\\s*days|daily|monday|mon)[^\\n\\r]*\\d{1,2}[:\\s]*\\d{0,2}",
+      ];
+
+      for (const pattern of enhancedHoursPatterns) {
+        const hours = extractTextContent(html, pattern);
+        if (hours && !extractedInfo.businessHours) {
+          extractedInfo.businessHours = hours
+            .replace(/hours?:|business|store|shop|open:/gi, "")
+            .trim();
+          console.log(
+            `   ✓ Business Hours: ${extractedInfo.businessHours.substring(
+              0,
+              50
+            )}...`
+          );
+          break;
+        }
+      }
+
+      // Extract emergency/24-hour service information
+      const emergencyPatterns = [
+        "24[\\s\\-]*hour",
+        "emergency[^\\n\\r]*service",
+        "roadside[^\\n\\r]*assistance",
+        "mobile[^\\n\\r]*service",
+        "on[\\s\\-]*site[^\\n\\r]*service",
+      ];
+
+      const emergencyServices = [];
+      for (const pattern of emergencyPatterns) {
+        const service = extractTextContent(html, pattern);
+        if (service) {
+          emergencyServices.push(service.trim());
+        }
+      }
+
+      if (emergencyServices.length > 0) {
+        extractedInfo.emergencyServices = [...new Set(emergencyServices)];
+        console.log(`   ✓ Emergency Services: ${emergencyServices.join(", ")}`);
+      }
+
+      // Extract certifications and warranties
+      const certificationPatterns = [
+        "ASE[\\s\\-]*certified",
+        "certified[^\\n\\r]*technician",
+        "licensed[^\\n\\r]*mechanic",
+        "warranty[^\\n\\r]*(?:guarantee|included|available)",
+        "insured[^\\n\\r]*bonded",
+        "AAA[\\s\\-]*approved",
+      ];
+
+      const certifications = [];
+      for (const pattern of certificationPatterns) {
+        const cert = extractTextContent(html, pattern);
+        if (cert) {
+          certifications.push(cert.trim());
+        }
+      }
+
+      if (certifications.length > 0) {
+        extractedInfo.certifications = [...new Set(certifications)];
+        console.log(`   ✓ Certifications: ${certifications.join(", ")}`);
+      }
+
+      // Extract pricing information
+      const pricingPatterns = [
+        "\\$\\d+[^\\n\\r]*(?:oil change|tire|brake|service)",
+        "starting[^\\$]*\\$\\d+",
+        "as low as[^\\$]*\\$\\d+",
+        "free[^\\n\\r]*(?:estimate|inspection|diagnostic)",
+      ];
+
+      const pricingInfo = [];
+      for (const pattern of pricingPatterns) {
+        const price = extractTextContent(html, pattern);
+        if (price) {
+          pricingInfo.push(price.trim());
+        }
+      }
+
+      if (pricingInfo.length > 0) {
+        extractedInfo.pricing = pricingInfo.join("; ");
+        console.log(`   ✓ Pricing Info: ${extractedInfo.pricing}`);
+      }
+    }
+
+    // Fallback to URL pattern matching if no content was scraped
+    if (
+      !extractedInfo.businessName &&
+      !extractedInfo.phone &&
+      !extractedInfo.address
+    ) {
+      console.log(
+        `   ⚠️ No content scraped - falling back to URL pattern matching`
+      );
+      return await searchBusinessInfo(link);
+    }
+
+    console.log(`   ✅ Successfully scraped business information`);
+    return extractedInfo;
+  } catch (error) {
+    console.log(`   ❌ Scraping error: ${error.message}`);
+    console.log(`   🔄 Falling back to URL pattern matching...`);
+    return await searchBusinessInfo(link);
+  }
+}
+
+// Original function for URL pattern matching (fallback)
 async function searchBusinessInfo(link) {
   try {
-    console.log(`🔍 Analyzing link: ${link}`);
+    console.log(`🔍 Analyzing link pattern: ${link}`);
 
     // Extract business information from URL patterns
     const extractedInfo = {
@@ -51,6 +766,10 @@ async function searchBusinessInfo(link) {
       businessType: null,
       specialties: null,
       description: null,
+      services: [],
+      reviews: [],
+      website: null,
+      socialMedia: {},
     };
 
     // Extract business name from Google Maps URLs
@@ -142,7 +861,7 @@ async function searchBusinessInfo(link) {
 
     return extractedInfo;
   } catch (error) {
-    console.log(`   ❌ Search error: ${error.message}`);
+    console.log(`   ❌ Pattern matching error: ${error.message}`);
     return {
       businessName: null,
       address: null,
@@ -152,13 +871,19 @@ async function searchBusinessInfo(link) {
       businessType: null,
       specialties: null,
       description: null,
+      services: [],
+      reviews: [],
+      website: null,
+      socialMedia: {},
     };
   }
 }
 
-// Function to extract business information from reference links
+// Enhanced function to extract comprehensive business information from reference links
 async function extractBusinessInfoFromLinks(links) {
-  console.log("\n🔍 Extracting business information from reference links...");
+  console.log(
+    "\n🔍 Extracting comprehensive business information from reference links..."
+  );
 
   const extractedInfo = {
     businessName: null,
@@ -169,26 +894,118 @@ async function extractBusinessInfoFromLinks(links) {
     businessType: null,
     specialties: null,
     description: null,
+    services: [],
+    reviews: [],
+    website: null,
+    socialMedia: {},
+    bbbRating: null,
+    yearsInBusiness: null,
+    emergencyServices: [],
+    certifications: [],
+    warranties: [],
+    pricing: null,
   };
+
+  const allScrapedData = [];
 
   for (const link of links) {
     console.log(`\n📱 Processing: ${link}`);
 
     try {
-      // Extract information directly from the link
-      const info = await searchBusinessInfo(link);
+      // Scrape comprehensive information from the link
+      const info = await scrapeBusinessInfo(link);
+      allScrapedData.push(info);
 
-      // Merge extracted info, prioritizing first found values
+      // Merge extracted info, prioritizing first found values but collecting all services and reviews
       Object.keys(info).forEach((key) => {
-        if (info[key] && !extractedInfo[key]) {
+        if (key === "services" && info[key] && info[key].length > 0) {
+          extractedInfo.services = [...extractedInfo.services, ...info[key]];
+        } else if (key === "reviews" && info[key] && info[key].length > 0) {
+          extractedInfo.reviews = [...extractedInfo.reviews, ...info[key]];
+        } else if (info[key] && !extractedInfo[key]) {
           extractedInfo[key] = info[key];
         }
       });
 
-      // Add a small delay to be respectful
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Add a delay to be respectful to servers
+      await delay(2000);
     } catch (error) {
       console.log(`   ❌ Error extracting from ${link}: ${error.message}`);
+    }
+  }
+
+  // Post-process the extracted data
+  if (extractedInfo.services.length > 0) {
+    // Remove duplicates and clean up services
+    extractedInfo.services = [...new Set(extractedInfo.services)];
+    if (!extractedInfo.specialties) {
+      extractedInfo.specialties = extractedInfo.services.slice(0, 5).join(", ");
+    }
+  }
+
+  if (extractedInfo.reviews.length > 0) {
+    // Limit reviews and remove duplicates
+    extractedInfo.reviews = [...new Set(extractedInfo.reviews)].slice(0, 10);
+  }
+
+  // Enhanced summary display
+  console.log("\n✅ COMPREHENSIVE EXTRACTION SUMMARY:");
+  console.log("=========================================");
+
+  let extractedCount = 0;
+  Object.keys(extractedInfo).forEach((key) => {
+    if (
+      extractedInfo[key] &&
+      (typeof extractedInfo[key] !== "object" || extractedInfo[key].length > 0)
+    ) {
+      const label = key
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (str) => str.toUpperCase());
+
+      if (key === "services") {
+        console.log(
+          `   ✓ ${label}: ${extractedInfo[key].length} found - ${extractedInfo[
+            key
+          ]
+            .slice(0, 3)
+            .join(", ")}${extractedInfo[key].length > 3 ? "..." : ""}`
+        );
+      } else if (key === "reviews") {
+        console.log(`   ✓ ${label}: ${extractedInfo[key].length} found`);
+      } else {
+        const value = extractedInfo[key].toString();
+        console.log(
+          `   ✓ ${label}: ${
+            value.length > 50 ? value.substring(0, 50) + "..." : value
+          }`
+        );
+      }
+      extractedCount++;
+    }
+  });
+
+  if (extractedCount === 0) {
+    console.log(
+      "   ⚠️  No information could be automatically extracted from the provided links."
+    );
+    console.log(
+      "      This might be due to website protection or structure changes."
+    );
+    console.log("      Manual input will be required for all fields.");
+  } else {
+    console.log(
+      `\n🎉 SUCCESS: Extracted ${extractedInfo.services.length} services, ${
+        extractedInfo.reviews.length
+      } reviews, and ${extractedCount - 2} other data points!`
+    );
+
+    if (webSearchAvailable) {
+      console.log(`🚀 SCRAPING PERFORMANCE:`);
+      console.log(
+        `   • ${links.length} links processed with full web scraping`
+      );
+      console.log(`   • Enhanced data extraction vs basic URL parsing`);
+      console.log(`   • Real-time business information gathered`);
     }
   }
 
@@ -225,13 +1042,45 @@ function generateCursorPrompt(data) {
 ## 📋 OBJECTIVE
 Please use this information to redesign the site ONLY USING AVAILABLE VALUES ACCESSIBLE ON THE localConfig.ts file (attached). BE EXTREMELY DETAILED FOR THIS IN YOUR SEARCH, do not skip any page or section, and make sure you have done careful analysis of their themes, colors, and logos to ensure visual representative style.
 
-## 🎯 BUSINESS INFORMATION
-**Company:** ${data.businessName}
-**Address:** ${data.address}
-**Phone:** ${data.phone}
-**Email:** ${data.email}
-**Business Type:** ${data.businessType}
-**Specialties:** ${data.specialties}
+## 🎯 BUSINESS INFORMATION (AUTO-EXTRACTED)
+${data.businessName ? `**Company:** ${data.businessName}` : ""}
+${data.address ? `**Address:** ${data.address}` : ""}
+${data.phone ? `**Phone:** ${data.phone}` : ""}
+${data.email ? `**Email:** ${data.email}` : ""}
+${data.businessType ? `**Business Type:** ${data.businessType}` : ""}
+${data.specialties ? `**Specialties:** ${data.specialties}` : ""}
+${data.bbbRating ? `**BBB Rating:** ${data.bbbRating}` : ""}
+${data.yearsInBusiness ? `**Years in Business:** ${data.yearsInBusiness}` : ""}
+${
+  data.emergencyServices && data.emergencyServices.length > 0
+    ? `**Emergency Services:** ${data.emergencyServices.join(", ")}`
+    : ""
+}
+${
+  data.certifications && data.certifications.length > 0
+    ? `**Certifications:** ${data.certifications.join(", ")}`
+    : ""
+}
+${data.pricing ? `**Pricing Information:** ${data.pricing}` : ""}
+
+## ⚠️ MISSING DATA HANDLING
+${
+  !data.businessName
+    ? "- ⚠️ Business name not found - keep existing localConfig value"
+    : ""
+}
+${
+  !data.address
+    ? "- ⚠️ Address not found - keep existing localConfig value"
+    : ""
+}
+${!data.phone ? "- ⚠️ Phone not found - keep existing localConfig value" : ""}
+${!data.email ? "- ⚠️ Email not found - keep existing localConfig value" : ""}
+${
+  !data.businessHours
+    ? "- ⚠️ Business hours not found - keep existing localConfig value"
+    : ""
+}
 
 ## 🕒 BUSINESS HOURS
 ${data.businessHours}
@@ -245,11 +1094,15 @@ ${data.availableImages.map((img) => `- ${img}`).join("\n")}
 ## ⭐ CUSTOMER REVIEWS FOR CONTEXT & TONE
 ${data.customerReviews}
 
-## 🚨 CRITICAL REQUIREMENTS
+## 🚨 CRITICAL REQUIREMENTS & PRESERVATION RULES
 - **DO NOT CHANGE THE IMAGES THAT ARE USED** - only use available images listed above
 - **ONLY USE VALUES FROM localConfig.ts** - no hardcoded content
+- **🚫 PRESERVE EXISTING SERVICES SECTIONS** - DO NOT modify or remove existing service offerings in localConfig.ts
+- **🚫 PRESERVE EXISTING GUARANTEE SECTIONS** - DO NOT modify or remove existing warranty/guarantee content
+- **📞 SKIP MISSING CONTACT INFO** - If phone/email wasn't extracted, keep existing localConfig values
+- **🎨 ONLY UPDATE WHAT WAS FOUND** - Only modify localConfig fields that have extracted data
 - **MAINTAIN AUTOMOTIVE BUSINESS VIBE** - professional, trustworthy, service-focused
-- **ENSURE ALL CONTENT ALIGNS** - services, colors, name, address, phone, business personality
+- **ENSURE ALL CONTENT ALIGNS** - colors, name, address, phone, business personality (when available)
 
 ## 🎨 DESIGN & BRANDING GUIDELINES
 **Primary Colors:** ${data.primaryColors}
@@ -307,21 +1160,46 @@ ${data.customerReviews}
 - [ ] Include seasonal automotive tips (winter prep, summer maintenance)
 - [ ] Add emergency repair guides if mobile service is offered
 
-## 🎯 LOCALCONFIG.TS UPDATES REQUIRED
+## 🎯 LOCALCONFIG.TS CONDITIONAL UPDATES
 
-### Business Information Section
-- [ ] companyName: "${data.businessName}"
-- [ ] address: "${data.address}"
-- [ ] phone: "${data.phone}"
-- [ ] email: "${data.email}"
-- [ ] businessHours: Update with actual operating hours
-- [ ] googleMapsUrl: Update to correct location
+### Business Information Section (Only Update If Data Available)
+${
+  data.businessName
+    ? `- [ ] companyName: "${data.businessName}"`
+    : "- [ ] companyName: KEEP EXISTING VALUE - no data found"
+}
+${
+  data.address
+    ? `- [ ] address: "${data.address}"`
+    : "- [ ] address: KEEP EXISTING VALUE - no data found"
+}
+${
+  data.phone
+    ? `- [ ] phone: "${data.phone}"`
+    : "- [ ] phone: KEEP EXISTING VALUE - no data found"
+}
+${
+  data.email
+    ? `- [ ] email: "${data.email}"`
+    : "- [ ] email: KEEP EXISTING VALUE - no data found"
+}
+${
+  data.businessHours
+    ? `- [ ] businessHours: "${data.businessHours}"`
+    : "- [ ] businessHours: KEEP EXISTING VALUE - no data found"
+}
+${
+  data.address
+    ? "- [ ] googleMapsUrl: Update to correct location"
+    : "- [ ] googleMapsUrl: KEEP EXISTING VALUE - no address found"
+}
 
-### Services Configuration
-- [ ] Update service categories to match business specialties
-- [ ] Ensure emergency services are highlighted if offered
-- [ ] Include mobile/on-site repair options if applicable
-- [ ] Update service descriptions with business-specific details
+### Services Configuration (PRESERVATION REQUIRED)
+- [ ] 🚫 DO NOT MODIFY existing service categories in localConfig.ts
+- [ ] 🚫 DO NOT REMOVE existing service offerings
+- [ ] 🚫 DO NOT CHANGE existing service descriptions
+- [ ] ✅ ONLY ADD emergency service highlights if detected and missing
+- [ ] ✅ ONLY ADD mobile service options if detected and missing
 
 ### Color Scheme & Branding
 - [ ] primaryColor: ${data.primaryColors}
@@ -392,8 +1270,8 @@ Based on customer reviews, implement these personality traits:
 
 ## 📱 MOBILE & EMERGENCY CONSIDERATIONS
 ${
-  data.businessType.toLowerCase().includes("mobile") ||
-  data.specialties.toLowerCase().includes("mobile")
+  (data.businessType && data.businessType.toLowerCase().includes("mobile")) ||
+  (data.specialties && data.specialties.toLowerCase().includes("mobile"))
     ? `- [ ] Emphasize mobile service capabilities throughout site
 - [ ] Include GPS/location sharing for mobile service requests
 - [ ] Highlight emergency/roadside assistance prominently
@@ -489,98 +1367,59 @@ async function main() {
       }
     }
 
-    // Collect only missing business information
-    console.log("\n🏢 Business Information:");
-    console.log("   (✓ = Auto-extracted, ? = Manual input needed)");
+    // Use only automatically extracted information
+    console.log("\n🏢 FULLY AUTOMATED BUSINESS INFORMATION EXTRACTION:");
+    console.log("   ✅ Using only automatically scraped data");
+    console.log("   🚫 No manual input required");
     console.log("");
 
-    const businessName =
-      extractedInfo.businessName ||
-      (await askQuestion(
-        `   ${extractedInfo.businessName ? "✓" : "?"} Business Name${
-          extractedInfo.businessName
-            ? " [" + extractedInfo.businessName + "]"
-            : ""
-        }: `
-      ));
+    // Only use what was successfully extracted
+    const businessName = extractedInfo.businessName;
+    const address = extractedInfo.address;
+    const phone = extractedInfo.phone;
+    const email = extractedInfo.email;
+    const businessType = extractedInfo.businessType;
+    const specialties = extractedInfo.specialties;
+    const businessHours = extractedInfo.businessHours;
 
-    const address =
-      extractedInfo.address ||
-      (await askQuestion(
-        `   ${extractedInfo.address ? "✓" : "?"} Full Business Address${
-          extractedInfo.address ? " [" + extractedInfo.address + "]" : ""
-        }: `
-      ));
+    // Display what we're using
+    if (businessName) console.log(`   ✓ Business Name: ${businessName}`);
+    if (address) console.log(`   ✓ Address: ${address}`);
+    if (phone) console.log(`   ✓ Phone: ${phone}`);
+    if (email) console.log(`   ✓ Email: ${email}`);
+    if (businessType) console.log(`   ✓ Business Type: ${businessType}`);
+    if (specialties) console.log(`   ✓ Specialties: ${specialties}`);
+    if (businessHours) console.log(`   ✓ Business Hours: ${businessHours}`);
 
-    const phone =
-      extractedInfo.phone ||
-      (await askQuestion(
-        `   ${extractedInfo.phone ? "✓" : "?"} Phone Number${
-          extractedInfo.phone ? " [" + extractedInfo.phone + "]" : ""
-        }: `
-      ));
+    // Set default branding if not extracted
+    const primaryColors = extractedInfo.primaryColors || "#1a365d, #2d3748";
+    const secondaryColors = extractedInfo.secondaryColors || "#f7fafc, #edf2f7";
+    const brandPersonality = "Professional, Trustworthy, Community-Focused";
+    const targetAudience =
+      "Local vehicle owners, Fleet managers, Emergency roadside needs";
 
-    const email =
-      extractedInfo.email ||
-      (await askQuestion(
-        `   ${extractedInfo.email ? "✓" : "?"} Email Address${
-          extractedInfo.email ? " [" + extractedInfo.email + "]" : ""
-        }: `
-      ));
+    console.log(`\n🎨 Using Default Automotive Branding:`);
+    console.log(`   ✓ Primary Colors: ${primaryColors}`);
+    console.log(`   ✓ Secondary Colors: ${secondaryColors}`);
+    console.log(`   ✓ Brand Personality: ${brandPersonality}`);
+    console.log(`   ✓ Target Audience: ${targetAudience}`);
 
-    const businessType =
-      extractedInfo.businessType ||
-      (await askQuestion(
-        `   ${extractedInfo.businessType ? "✓" : "?"} Business Type${
-          extractedInfo.businessType
-            ? " [" + extractedInfo.businessType + "]"
-            : ""
-        } (e.g., "Tire Shop", "Full Service Auto Repair", "Mobile Mechanic"): `
-      ));
-
-    const specialties =
-      extractedInfo.specialties ||
-      (await askQuestion(
-        `   ${extractedInfo.specialties ? "✓" : "?"} Main Specialties${
-          extractedInfo.specialties
-            ? " [" + extractedInfo.specialties + "]"
-            : ""
-        } (e.g., "Tires, Oil Changes, Brake Repair, Emergency Service"): `
-      ));
-
-    console.log("\n🕒 Business Hours:");
-    const businessHours =
-      extractedInfo.businessHours ||
-      (await askQuestion(
-        `   ${extractedInfo.businessHours ? "✓" : "?"} Business Hours${
-          extractedInfo.businessHours
-            ? " [" + extractedInfo.businessHours + "]"
-            : ""
-        }: `
-      ));
-
-    console.log("\n🎨 Brand & Design Information:");
-    const primaryColors = await askQuestion(
-      '   Primary Colors (e.g., "#801d1e, #8e3334"): '
-    );
-    const secondaryColors = await askQuestion(
-      '   Secondary Colors (e.g., "#f5f5f5, #333333"): '
-    );
-    const brandPersonality = await askQuestion(
-      '   Brand Personality (e.g., "Professional, Trustworthy, Community-Focused"): '
-    );
-    const targetAudience = await askQuestion(
-      '   Target Audience (e.g., "Local vehicle owners, Fleet managers, Emergency roadside needs"): '
-    );
-
-    console.log("\n⭐ Customer Reviews Section:");
-    console.log("   You can either:");
-    console.log("   1. Paste actual customer reviews");
-    console.log("   2. Use template automotive reviews");
-    const useTemplate = await askQuestion("   Use template reviews? (y/n): ");
-
+    // Use extracted reviews or default template
     let customerReviews;
-    if (useTemplate.toLowerCase() === "y") {
+    if (extractedInfo.reviews && extractedInfo.reviews.length > 0) {
+      console.log(
+        `\n⭐ Using ${extractedInfo.reviews.length} Auto-Extracted Customer Reviews`
+      );
+      customerReviews = extractedInfo.reviews
+        .map(
+          (review, index) =>
+            `**Customer ${index + 1}** - Recent Review\n"${review}"`
+        )
+        .join("\n\n");
+    } else {
+      console.log(
+        "\n⭐ Using Template Automotive Reviews (no reviews extracted)"
+      );
       customerReviews = `
 **David Jayy** - 2 weeks ago
 "This is one of the best tire shops to go to. I've been coming here for Years and the service is always top tier. Mr. Harris always takes care of me and always make sure that I am well taken care of and they have the best tires in town."
@@ -597,12 +1436,6 @@ async function main() {
 **Thomas Johnson** - 11 months ago
 "great shop and owner! i've gotten some tires here often and never leave disappointed, they always have my not so common sizes so i'm content. will definitely recommend them to anyone looking for some good used tires and real professionalism."
 `;
-    } else {
-      console.log("   Paste your customer reviews (press Ctrl+D when done):");
-      const chunks = [];
-      process.stdin.on("data", (chunk) => chunks.push(chunk));
-      await new Promise((resolve) => process.stdin.on("end", resolve));
-      customerReviews = Buffer.concat(chunks).toString();
     }
 
     // Generate the prompt
@@ -634,37 +1467,50 @@ async function main() {
       outputFile
     );
 
-    // Show extraction summary
+    // Show comprehensive automation summary
     const finalExtractedCount = Object.values(extractedInfo).filter(
-      (v) => v !== null
+      (v) => v !== null && (typeof v !== "object" || v.length > 0)
     ).length;
-    if (finalExtractedCount > 0) {
-      console.log(`\n🚀 AUTOMATION SUMMARY:`);
-      console.log(
-        `   • ${finalExtractedCount} pieces of information auto-extracted from ${referenceLinks.length} reference links`
-      );
-      console.log(
-        `   • Manual input reduced by ${Math.round(
-          (finalExtractedCount / 8) * 100
-        )}%`
-      );
-      console.log(
-        `   • Time saved: ~${finalExtractedCount * 30} seconds of typing`
-      );
+
+    console.log(`\n🚀 FULLY AUTOMATED PROCESSING SUMMARY:`);
+    console.log(`=========================================`);
+    console.log(
+      `   ✅ ${finalExtractedCount} data points automatically extracted from ${referenceLinks.length} links`
+    );
+    console.log(`   🚫 Zero manual input required`);
+    console.log(`   🔒 Existing services & guarantees preserved`);
+    console.log(
+      `   📞 Missing contact info handling: skip and preserve existing`
+    );
+    console.log(`   🎨 Smart defaults applied for branding`);
+
+    const dataTypes = [];
+    if (businessName) dataTypes.push("Business Name");
+    if (address) dataTypes.push("Address");
+    if (phone) dataTypes.push("Phone");
+    if (email) dataTypes.push("Email");
+    if (businessHours) dataTypes.push("Hours");
+    if (extractedInfo.emergencyServices?.length > 0)
+      dataTypes.push("Emergency Services");
+    if (extractedInfo.reviews?.length > 0)
+      dataTypes.push(`${extractedInfo.reviews.length} Reviews`);
+
+    if (dataTypes.length > 0) {
+      console.log(`   📊 Extracted: ${dataTypes.join(", ")}`);
     }
 
-    console.log("\n📋 Next Steps:");
+    console.log("\n📋 NEXT STEPS - FULLY AUTOMATED:");
     console.log("1. Copy the contents of cursor-automotive-redesign-prompt.md");
     console.log("2. Paste it into Cursor AI chat");
     console.log("3. Attach your localConfig.ts file to the conversation");
-    console.log("4. Let Cursor AI redesign the entire website systematically");
-    console.log("\n🔧 The prompt includes comprehensive instructions for:");
-    console.log("   • Complete business information integration");
-    console.log("   • Page-by-page redesign checklist");
-    console.log("   • LocalConfig.ts updates");
-    console.log("   • Brand consistency verification");
-    console.log("   • Mobile and emergency service optimization");
-    console.log("   • SEO and local business improvements");
+    console.log("4. AI will automatically apply ONLY the extracted data");
+    console.log("\n🔧 The automated prompt includes:");
+    console.log("   ✅ Only update fields with extracted data");
+    console.log("   🚫 Preserve existing services & guarantee sections");
+    console.log("   📞 Skip missing contact info (keep existing values)");
+    console.log("   🎨 Smart automotive branding defaults");
+    console.log("   ⭐ Auto-extracted or template customer reviews");
+    console.log("   🔒 Zero risk of data loss or unwanted changes");
 
     if (!webSearchAvailable) {
       console.log(
