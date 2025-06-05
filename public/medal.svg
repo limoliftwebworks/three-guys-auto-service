@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Medal Ribbon -->
+  <path d="M9 16L7 21L12 19L17 21L15 16" fill="#60A5FA"/>
+  <path d="M9 16L7 21L12 19L17 21L15 16" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Medal Circle -->
+  <circle cx="12" cy="10" r="7" fill="#60A5FA"/>
+  <circle cx="12" cy="10" r="6" fill="#1D4ED8"/>
+  
+  <!-- Star Design -->
+  <path d="M12 6L13.2451 8.90983L16.5106 8.83688L14.2181 10.9402L15.1145 14L12 12.25L8.88549 14L9.78189 10.9402L7.48944 8.83688L10.7549 8.90983L12 6Z" fill="#60A5FA"/>
+</svg> 

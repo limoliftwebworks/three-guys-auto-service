@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialog Prevention</title>
+  <style>
+    body {
+      background: transparent;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 0;
+      height: 0;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Function to check any "Prevent additional dialogs" checkboxes
+    function checkDialogPreventionBoxes() {
+      // Set a flag to indicate we have this handler active
+      sessionStorage.setItem('dialog_prevention_active', 'true');
+      
+      // Function to check any dialog checkboxes
+      function checkBoxes() {
+        const dialogs = document.querySelectorAll('dialog, [role="dialog"]');
+        dialogs.forEach(dialog => {
+          const checkbox = dialog.querySelector('input[type="checkbox"]');
+          if (checkbox) {
+            checkbox.checked = true;
+            console.log('Found and checked dialog prevention checkbox');
+          }
+          
+          // Find any "Leave" buttons and click them if needed
+          const leaveButtons = dialog.querySelectorAll('button');
+          leaveButtons.forEach(button => {
+            if (button.textContent && button.textContent.includes('Leave')) {
+              console.log('Found Leave button - clicking it');
+              setTimeout(() => {
+                button.click();
+              }, 100);
+            }
+          });
+        });
+      }
+      
+      // Check for dialogs when DOM changes
+      const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if (mutation.type === 'childList' && mutation.addedNodes.length) {
+            // Wait a bit for the dialog to fully initialize
+            setTimeout(checkBoxes, 50);
+          }
+        });
+      });
+      
+      // Start observing
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+      
+      // Also check right away for any existing dialogs
+      checkBoxes();
+      
+      // Prevent navigation warnings
+      window.addEventListener('beforeunload', (e) => {
+        e.preventDefault();
+        e.returnValue = undefined;
+        return undefined;
+      }, true);
+      
+      // Message the parent frame that we're active
+      if (window.parent !== window) {
+        window.parent.postMessage({
+          type: 'dialog_prevention_active'
+        }, '*');
+      }
+      
+      console.log('Dialog prevention active');
+    }
+    
+    // Run when the page loads
+    window.addEventListener('DOMContentLoaded', checkDialogPreventionBoxes);
+    
+    // Also run immediately if the DOM is already loaded
+    if (document.readyState !== 'loading') {
+      checkDialogPreventionBoxes();
+    }
+  </script>
+</body>
+</html> 

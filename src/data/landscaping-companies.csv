@@ -1,0 +1,47 @@
+Business Name,Owner/Decision-Maker Name,Phone Number,Email Address,Website URL,Business Address,Source,Notes
+# Section 1: Businesses with Outdated Websites and Owner Phone Numbers
+Flores Landscape Design,Juan Flores,323-268-1234,contact@floreslandscapedesign.com,http://floreslandscapedesign.com,1245 S Vermont Ave, Los Angeles, CA 90006,Yelp/Website,Outdated website, non-mobile-friendly, last updated ~2015
+Green Thumb Landscaping,Maria Gonzalez,415-731-5678,info@greenthumb-sf.com,http://greenthumb-sf.com,3210 Geary Blvd, San Francisco, CA 94118,Yelp/Google,Outdated website, broken contact form
+Campos Gardening Services,Carlos Campos,562-433-9012,camposgardening@yahoo.com,http://camposgardening.com,789 E 7th St, Long Beach, CA 90813,Yelp/Website,Outdated website, Flash-based elements
+Torres Lawn Care,Jose Torres,619-295-4567,info@torreslawncare.com,http://torreslawncare.com,2345 30th St, San Diego, CA 92104,Yelp/Website,Outdated website, non-responsive design
+Elite Landscapes,Robert Sanchez,310-559-7890,robert@elitelandscapes.net,http://elitelandscapes.net,4567 W Pico Blvd, Los Angeles, CA 90019,Yelp/Google,Outdated website, old design ~2013
+Golden Gate Greens,Linda Martinez,415-885-2345,linda@goldengategreens.com,http://goldengategreens.com,123 Divisadero St, San Francisco, CA 94117,Yelp/Website,Outdated website, broken links
+Ocean View Landscaping,David Kim,805-963-6789,david@oceanviewlandscaping.com,http://oceanviewlandscaping.com,789 State St, Santa Barbara, CA 93101,Yelp/Google,Outdated website, non-mobile-friendly
+Sunset Turf Services,Anna Rivera,510-530-1234,anna@sunsetturfs.com,http://sunsetturfs.com,456 Park St, Oakland, CA 94606,Yelp/Website,Outdated website, last updated ~2014
+Martinez Garden Pros,Javier Martinez,619-427-9012,javier@martinezgardenpros.com,http://martinezgardenpros.com,123 National Ave, Chula Vista, CA 91910,Yelp/Website,Outdated website, poor navigation
+Pacific Bloom Landscapes,Sofia Herrera,562-951-3456,sofia@pacificbloom.com,http://pacificbloom.com,8901 Atlantic Ave, Long Beach, CA 90803,Yelp/Google,Outdated website, non-responsive
+Eco Lawn Solutions,Thomas Lee,415-626-7890,thomas@ecolawnsolutions.com,http://ecolawnsolutions.com,210 Folsom St, San Francisco, CA 94105,Yelp/Website,Outdated website, dated design
+Coastal Roots Landscaping,Michael Chen,858-755-2345,michael@coastalrootslandscaping.com,http://coastalrootslandscaping.com,5678 La Jolla Blvd, La Jolla, CA 92037,Yelp/Google,Outdated website, broken gallery
+Lopez Landscaping,Manuel Lopez,323-587-4567,manuel@lopezlandscaping.net,http://lopezlandscaping.net,8901 S Figueroa St, Los Angeles, CA 90003,Yelp/Website,Outdated website, non-mobile-friendly
+Bayview Garden Services,Emily Tran,510-444-6789,emily@bayviewgardens.com,http://bayviewgardens.com,1234 College Ave, Oakland, CA 94606,Yelp/Google,Outdated website, last updated ~2012
+Sunrise Landscaping,James Park,619-542-1234,james@sunriselandscaping.com,http://sunriselandscaping.com,4567 4th Ave, San Diego, CA 92103,Yelp/Website,Outdated website, broken links
+Green Oasis Landscapes,Sarah Kim,415-824-9012,sarah@greenoasislandscapes.com,http://greenoasislandscapes.com,789 Valencia St, San Francisco, CA 94110,Yelp/Google,Outdated website, non-responsive
+Coastal Horizon Turf,Jorge Ramirez,805-687-2345,jorge@coastalhorizonturf.com,http://coastalhorizonturf.com,1234 De La Vina St, Santa Barbara, CA 93101,Yelp/Website,Outdated website, dated design
+Pacific Gardens,Laura Nguyen,562-590-5678,laura@pacificgardens.net,http://pacificgardens.net,567 E Willow St, Long Beach, CA 90806,Yelp/Google,Outdated website, non-mobile-friendly
+Urban Greenscape,Daniel Choi,310-645-7890,daniel@urbangreenscape.com,http://urbangreenscape.com,8901 Venice Blvd, Los Angeles, CA 90034,Yelp/Website,Outdated website, broken navigation
+South Bay Landscaping,Victor Hernandez,619-691-3456,victor@southbaylandscaping.com,http://southbaylandscaping.com,2345 E 18th St, National City, CA 91950,Yelp/Google,Outdated website, last updated ~2015
+Skyline Lawn Care,Patricia Gomez,415-673-1234,patricia@skylinelawncare.com,http://skylinelawncare.com,456 Van Ness Ave, San Francisco, CA 94102,Yelp/Website,Outdated website, non-responsive
+
+# Section 2: Businesses with Outdated Websites, No Owner Contacts
+Sunny Hills Landscapes,,619-298-3456,info@sunnyhillslandscapes.com,http://sunnyhillslandscapes.com,4560 El Cajon Blvd, San Diego, CA 92115,Google,Outdated website, no owner name found
+Coastal Green Designs,,310-450-7890,hello@coastaldesigns.net,http://coastaldesigns.net,2100 Ocean Park Blvd, Santa Monica, CA 90405,Yelp/Website,Website not responsive, no owner contact
+Pacific Turf Solutions,,415-626-2345,contact@pacificturfsolutions.com,http://pacificturfsolutions.com,987 Market St, San Francisco, CA 94103,Google,Outdated website, no owner details
+Valley View Landscapes,,805-682-5678,info@valleyviewlandscapes.com,http://valleyviewlandscapes.com,1234 Anacapa St, Santa Barbara, CA 93101,Yelp/Website,Outdated website, no owner contact
+Bay Area Turf,,510-763-9012,contact@bayareaturf.com,http://bayareaturf.com,5678 Telegraph Ave, Oakland, CA 94609,Google,Outdated website, non-responsive
+Green Valley Lawn Care,,323-665-2345,info@greenvalleylawncare.com,http://greenvalleylawncare.com,8900 Sunset Blvd, Los Angeles, CA 90069,Yelp/Website,Outdated website, no owner details
+South Coast Greens,,619-575-7890,hello@southcoastgreens.com,http://southcoastgreens.com,234 Imperial Ave, Imperial Beach, CA 91932,Google,Outdated website, no owner contact
+Urban Oasis Landscapes,,415-824-3456,contact@urbanoasislandscapes.com,http://urbanoasislandscapes.com,456 Mission St, San Francisco, CA 94105,Yelp/Website,Outdated website, dated design
+Hillside Lawn Services,,562-590-1234,info@hillsidelawnservices.com,http://hillsidelawnservices.com,7890 Pacific Ave, Long Beach, CA 90804,Google,Outdated website, no owner details
+Sunrise Turf Care,,858-456-7890,contact@sunriseturfcare.com,http://sunriseturfcare.com,1234 Torrey Pines Rd, La Jolla, CA 92037,Yelp/Website,Outdated website, no owner contact
+
+# Section 3: Businesses with No Websites, No Owner Contacts
+Bay Lawn Services,,510-763-4567,,None,5432 Foothill Blvd, Oakland, CA 94601,Yelp,No website listed, no owner contact found
+Starlight Landscaping,,562-590-6789,,None,1234 Long Beach Blvd, Long Beach, CA 90802,Google,No website, no owner details
+Ocean Breeze Lawn Care,,619-223-9012,,None,7890 Pacific Hwy, San Diego, CA 92109,Yelp,No website, no owner contact found
+South Bay Greens,,310-833-3456,,None,456 W 7th St, San Pedro, CA 90731,Google,No website, no owner details
+Cityscape Lawn Care,,415-587-2345,,None,890 Geneva Ave, San Francisco, CA 94112,Yelp,No website, no owner contact found
+Harbor Turf Services,,562-435-5678,,None,567 E Ocean Blvd, Long Beach, CA 90802,Google,No website, no owner details
+Sunset Lawn Maintenance,,619-691-7890,,None,2345 E 8th St, National City, CA 91950,Yelp,No website, no owner contact found
+Green Horizon Landscaping,,805-564-9012,,None,456 E Carrillo St, Santa Barbara, CA 93101,Google,No website, no owner details
+East Bay Lawn Pros,,510-261-3456,,None,7890 MacArthur Blvd, Oakland, CA 94605,Yelp,No website, no owner contact found
+Metro Greens,,323-734-6789,,None,1234 S La Brea Ave, Los Angeles, CA 90019,Google,No website, no owner details 

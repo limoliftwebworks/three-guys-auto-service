@@ -1,0 +1,107 @@
+/* cursor.css - Forces the cursor to be none on all elements, but only on non-mobile devices */
+
+/* Only apply cursor styles on non-mobile devices (663px or larger) */
+@media (min-width: 663px) {
+  html:not(.mobile-device):not([data-is-mobile="true"]) *,
+  body:not(.mobile-device):not([data-is-mobile="true"]) * {
+    cursor: none !important;
+  }
+
+  html:not(.mobile-device):not([data-is-mobile="true"]),
+  body:not(.mobile-device):not([data-is-mobile="true"]),
+  div:not(.mobile-device):not([data-is-mobile="true"]),
+  span:not(.mobile-device):not([data-is-mobile="true"]),
+  a:not(.mobile-device):not([data-is-mobile="true"]),
+  button:not(.mobile-device):not([data-is-mobile="true"]),
+  input:not(.mobile-device):not([data-is-mobile="true"]),
+  textarea:not(.mobile-device):not([data-is-mobile="true"]),
+  select:not(.mobile-device):not([data-is-mobile="true"]),
+  option:not(.mobile-device):not([data-is-mobile="true"]),
+  [role="button"]:not(.mobile-device):not([data-is-mobile="true"]),
+  [class*="btn"]:not(.mobile-device):not([data-is-mobile="true"]),
+  [class*="button"]:not(.mobile-device):not([data-is-mobile="true"]) {
+    cursor: none !important;
+  }
+
+  /* Some browsers might need this additional specificity */
+  body:not(.mobile-device):not([data-is-mobile="true"]) * {
+    cursor: none !important;
+  }
+
+  /* Extra specificity for interactive elements */
+  a:not(.mobile-device):not([data-is-mobile="true"]) *,
+  button:not(.mobile-device):not([data-is-mobile="true"]) *,
+  input:not(.mobile-device):not([data-is-mobile="true"]) *,
+  textarea:not(.mobile-device):not([data-is-mobile="true"]) *,
+  select:not(.mobile-device):not([data-is-mobile="true"]) *,
+  [role="button"]:not(.mobile-device):not([data-is-mobile="true"]) *,
+  [class*="btn"]:not(.mobile-device):not([data-is-mobile="true"]) *,
+  [class*="button"]:not(.mobile-device):not([data-is-mobile="true"]) *,
+  [tabindex]:not(.mobile-device):not([data-is-mobile="true"]),
+  [tabindex]:not(.mobile-device):not([data-is-mobile="true"]) * {
+    cursor: none !important;
+  }
+
+  /* Target hover states specifically */
+  *:hover:not(.mobile-device):not([data-is-mobile="true"]) {
+    cursor: none !important;
+  }
+}
+
+/* Let mobile devices use default touch pointers */
+@media (max-width: 662px), .mobile-device, html[data-is-mobile="true"] {
+  * {
+    cursor: auto !important;
+  }
+
+  html,
+  body,
+  div,
+  span,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  option,
+  [role="button"],
+  [class*="btn"],
+  [class*="button"] {
+    cursor: auto !important;
+  }
+}
+
+/* Ensure mobile devices have default cursors regardless of screen size */
+.mobile-device *,
+html[data-is-mobile="true"] * {
+  cursor: auto !important;
+}
+
+.mobile-device html,
+.mobile-device body,
+.mobile-device div,
+.mobile-device span,
+.mobile-device a,
+.mobile-device button,
+.mobile-device input,
+.mobile-device textarea,
+.mobile-device select,
+.mobile-device option,
+.mobile-device [role="button"],
+.mobile-device [class*="btn"],
+.mobile-device [class*="button"],
+html[data-is-mobile="true"] html,
+html[data-is-mobile="true"] body,
+html[data-is-mobile="true"] div,
+html[data-is-mobile="true"] span,
+html[data-is-mobile="true"] a,
+html[data-is-mobile="true"] button,
+html[data-is-mobile="true"] input,
+html[data-is-mobile="true"] textarea,
+html[data-is-mobile="true"] select,
+html[data-is-mobile="true"] option,
+html[data-is-mobile="true"] [role="button"],
+html[data-is-mobile="true"] [class*="btn"],
+html[data-is-mobile="true"] [class*="button"] {
+  cursor: auto !important;
+}
