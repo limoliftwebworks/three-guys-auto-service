@@ -208,7 +208,7 @@ const localConfig: LocalConfig = {
         "guaranteeIconBorderColor2": "#dbeafe",
         "guaranteeTitleTextColor2": "#111827",
         "guaranteeSubtitleTextColor2": "#6b7280",
-        "guaranteeCenterLogo": "logo.png",
+        "guaranteeCenterLogo": "arow-logo.png",
         "guaranteeCenterBgColor": "#ffffff",
         "guaranteeCenterBorderColor": "#dbeafe",
         "guaranteeIcon4": "calculator.png",
