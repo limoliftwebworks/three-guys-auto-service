@@ -1,8 +1,5 @@
 // Define the type for the localConfig object
-//supapass:RemovalTreeDavis321!
-// Link For Hex Colors: https://www.color-hex.com/
-
-import { SiteConfig } from "./configFixTypes";
+import { SiteConfig } from './configTypes';
 
 // Export the LocalConfig interface as an alias for backward compatibility
 export type LocalConfig = SiteConfig;
@@ -62,7 +59,7 @@ const localConfig: LocalConfig = {
   "loadingScreen": {
     "enabled": true,
     "backgroundColor": "rgba(30, 58, 138, 0.21)",
-    "logoImage": "arow-logo.png",
+    "logoImage": "logo.png",
     "logoWidth": 280,
     "logoAlt": "3 Guy's Auto Service & Detailing",
     "spinner": {
@@ -72,7 +69,7 @@ const localConfig: LocalConfig = {
       "thickness": 4
     },
     "timing": {
-      "minimumDisplayTime": 400,
+      "minimumDisplayTime": 300,
       "fadeOutDuration": 100
     }
   },
