@@ -118,7 +118,7 @@ const localConfig: LocalConfig = {
       "subtitle2": "We'll Make it Look Better and Run Better. Professional tire installation, brake repair, oil changes, and detailing services with exceptional customer service.",
       "heroSubtitleColor": "#dbeafe",
       "heroImage": "1.png",
-      "heroMobileImage": "auto-hero-mobile-red.png",
+      "heroMobileImage": "mobile1.png",
       "heroGradientTop": "rgba(30, 58, 138, 1)",
       "heroGradientBottom": "#1e40af",
       "scheduleButtonText": "Get Free Estimate",
